@@ -85,7 +85,10 @@ h1{font-size:27px;margin:5px 0}
 .search{flex:1;min-width:190px}
 .date-row{margin-top:12px;font-size:12px}
 .date-row input{padding:5px 8px}
-.heading{display:flex;justify-content:space-between;align-items:center;margin:21px 0 12px}
+.heading{
+  display:flex;justify-content:space-between;align-items:center;
+  gap:10px;margin:21px 0 12px;
+}
 .heading h2{font-size:17px;margin:0}
 .grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:15px}
 .card{
@@ -142,14 +145,18 @@ dialog p{font-size:13px;color:var(--muted)}
 .field{display:block;margin:13px 0}
 .field span{display:block;color:var(--muted);font-size:12px;margin-bottom:5px}
 .field input,.field select,.field textarea{width:100%}
-.dialog-actions{display:flex;justify-content:flex-end;gap:8px;flex-wrap:wrap;margin-top:20px}
+.dialog-actions{
+  display:flex;justify-content:flex-end;gap:8px;flex-wrap:wrap;margin-top:20px;
+}
 #toast{
   position:fixed;bottom:25px;left:50%;transform:translateX(-50%);
   background:#26304a;color:white;padding:12px 20px;border-radius:12px;
   max-width:90vw;z-index:100;box-shadow:0 8px 30px #17203e33;
 }
 #toast[hidden]{display:none}
-@media(min-width:1350px){.grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(min-width:1350px){
+  .grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+}
 @media(max-width:1000px){
   .sidebar{width:190px;padding:25px 12px}
   main{padding:24px 20px}
@@ -227,16 +234,17 @@ dialog p{font-size:13px;color:var(--muted)}
     </section>
 
     <div class="banner update">
-      <strong>本次文件已合并：</strong>
-      聊天记录 8.txt 与已归档的宋庆龄陵园志愿者招募重复。
-      已补充来源，不重复新增待办；内置事项仍为 26 条。
-      <button id="latestFileBtn" class="subtle">查看本次文件对应事项</button>
+      <strong>本次新增 2 条：</strong>
+      上海体育博物馆志愿者招募、上海图书馆志愿者招募。
+      来源：聊天记录 9.txt，发布时间为 2026-10-11 13:10。
+      内置事项共 <span id="baseCount">28</span> 条。
+      <button id="latestFileBtn" class="subtle">查看本次新增</button>
     </div>
     <div class="banner">
-      <strong>作业提醒：</strong>2026 年 10 月 10 日通知要求：
-      期末心得下周带到课上，否则记 0 分。
-      “下周”“下节课”的具体日期待核实，不自动猜测截止时间。
-      报名截止与活动时间分开记录。
+      <strong>作业提醒：</strong>
+      2026 年 10 月 10 日通知要求：期末心得下周带到课上，否则记 0 分。
+      具体上课日期待核实，不自动猜测截止时间。
+      本次两个志愿项目的报名截止、服务时间和报名条件也待查看原推文。
     </div>
 
     <section class="tools" aria-label="搜索与筛选">
@@ -245,8 +253,9 @@ dialog p{font-size:13px;color:var(--muted)}
           placeholder="搜索通知、来源文件、关键词…" aria-label="搜索事项">
         <select id="sourceFilter" aria-label="来源范围">
           <option value="all">全部来源</option>
-          <option value="latest">本次文件：聊天记录 8.txt</option>
-          <option value="previous">上次新增的 5 条</option>
+          <option value="latest">本次文件：聊天记录 9.txt</option>
+          <option value="file8">上次文件：聊天记录 8.txt</option>
+          <option value="courseBatch">此前新增的 5 条</option>
           <option value="personal">个人待办</option>
         </select>
         <select id="statusFilter" aria-label="完成状态">
@@ -279,7 +288,7 @@ dialog p{font-size:13px;color:var(--muted)}
         <span class="muted">紧急程度参考：</span>
         <input id="referenceDate" type="date" aria-label="参考日期">
         <button id="actualDateBtn">使用当前时间</button>
-        <button id="archiveDateBtn">回看 2026-10-10</button>
+        <button id="archiveDateBtn">回看 2026-10-11</button>
         <button id="resetBtn">重置筛选</button>
         <span id="referenceNote" class="muted"></span>
       </div>
@@ -310,7 +319,8 @@ dialog p{font-size:13px;color:var(--muted)}
     </div>
     <p>
       没有明确截止时刻的事项，请手动设置提醒。
-      页面关闭或浏览器休眠时无法保证准时触发；再次打开会补报未处理提醒。
+      页面关闭或浏览器休眠时无法保证准时触发；
+      再次打开会补报未处理提醒。
     </p>
     <div class="dialog-actions">
       <button type="button" id="removeReminderBtn" class="danger">取消已有提醒</button>
@@ -324,10 +334,12 @@ dialog p{font-size:13px;color:var(--muted)}
   <form id="addForm">
     <h2>新增个人待办</h2>
     <label class="field">
-      <span>事项名称</span><input name="title" required maxlength="120">
+      <span>事项名称</span>
+      <input name="title" required maxlength="120">
     </label>
     <label class="field">
-      <span>分类</span><select id="addCategory" name="category"></select>
+      <span>分类</span>
+      <select id="addCategory" name="category"></select>
     </label>
     <label class="field">
       <span>截止时间（设备本地时间，可不填）</span>
@@ -354,7 +366,8 @@ const CATEGORIES = {
   "志愿":"🤝","社团":"💡","学生服务":"🎓","安全":"🛡"
 };
 
-// 固定 ID 与旧版保持一致；重复来源不重复创建事项。
+// 旧事项沿用固定 ID，避免完成状态和提醒失去关联。
+// 新文件独立归档；重复文件仅合并来源。
 const BASE_TASKS = [
   {
     id:"national-security",
@@ -600,7 +613,7 @@ const BASE_TASKS = [
     ddl:"unknown",
     priority:"high",
     priorityText:"优先处理 · 下周课上提交",
-    previousBatch:true,
+    courseBatch:true,
     timeText:"下周带到课上；具体上课日期待核实",
     description:"期末作业：500–1000 字感悟心得，纸质版。\n标题下标明姓名、学号、院系及授课教师姓名。\n10 月 10 日群通知强调：下周务必带到课上，否则记 0 分。\n请核实下次上课日期，提前写作和打印。",
     source:"课程 PPT 图片1；2026-10-10 21:03 群通知（重复文件已合并）"
@@ -611,7 +624,7 @@ const BASE_TASKS = [
     category:"学习",
     published:"2026-10-10T21:03:00+08:00",
     ddl:"unknown",
-    previousBatch:true,
+    courseBatch:true,
     timeText:"下节课分享感受；具体日期待核实",
     description:"按课程 PPT 要求至少练习 2 次，下节课分享感受。\n通知提到配套背景音乐和渐进式放松训练视频，当前材料未包含文件或链接，请回原群查看。\n可记录每次练习后的感受。",
     attachment:"配套背景音乐和渐进式放松训练视频（当前材料未提供）",
@@ -623,7 +636,7 @@ const BASE_TASKS = [
     category:"学习",
     published:"2026-10-10T21:03:00+08:00",
     ddl:"unknown",
-    previousBatch:true,
+    courseBatch:true,
     timeText:"下周课堂使用；具体日期待核实",
     description:"下周有绘画任务，每个小组带 1 套水彩笔，不是每位同学各带一套。\n建议组内确认由谁携带。",
     source:"课程 PPT 图片1；2026-10-10 21:03 群通知"
@@ -634,7 +647,7 @@ const BASE_TASKS = [
     category:"学习",
     published:"2026-10-10T21:03:00+08:00",
     ddl:"none",
-    previousBatch:true,
+    courseBatch:true,
     timeText:"尽快填写；未给出明确截止",
     description:"尚未填写课程反馈的同学请尽快填写。\n入口为课程 PPT 底部的“课程感受反馈”二维码。\n当前没有二维码目标地址，请扫描原图或询问原群发布者。",
     attachment:"课程 PPT 底部“课程感受反馈”二维码",
@@ -646,16 +659,43 @@ const BASE_TASKS = [
     category:"志愿",
     published:"2026-10-10T17:03:00+08:00",
     ddl:"unknown",
-    previousBatch:true,
-    latestFile:true,
+    courseBatch:true,
+    file8:true,
     timeText:"报名截止、活动时间和具体安排待查看推文",
     description:"张婉婷转发“国教实践｜宋庆龄陵园志愿者招募”，并于 17:04 补充：对志愿者活动感兴趣的可以看一看。\n聊天正文未列出报名条件、名额、服务时间及截止，请查看原推文。\n聊天记录 8.txt 与此前聊天记录 5.txt 内容相同，已合并来源，不重复创建待办。\n尚未确认与“兴家 / 宋园志愿项目咨询”是否为同一项目。",
     url:"https://mp.weixin.qq.com/s?__biz=MzU5NzUwNDQ2Mg==&mid=2247523462&idx=3&sn=c1a6d0c08b66f4b07a13a47ac2d19b39&chksm=ff4124edebfe4cb96073f15ef8e5110fa8ee33681e87a65aa59978e90c6364477fcb80019dd8&mpshare=1&scene=1&srcid=101040Yo34GaBepcdag4EMG5&sharer_shareinfo=a36d445109c861d71c7d1f7deb20c23e&sharer_shareinfo_first=a36d445109c861d71c7d1f7deb20c23e#rd",
     source:"聊天记录 5.txt、聊天记录 8.txt · 2026-10-10 17:03—17:04（重复来源已合并）"
+  },
+
+  // 本次新增：聊天记录 9.txt。
+  // 同一发布者、同一时刻，但项目和推文不同，因此分别归档。
+  {
+    id:"shanghai-sports-museum-volunteer",
+    title:"国教实践：上海体育博物馆志愿者招募",
+    category:"志愿",
+    published:"2026-10-11T13:10:00+08:00",
+    ddl:"unknown",
+    latestFile:true,
+    timeText:"报名截止、服务时间及具体安排待查看原推文",
+    description:"发布者“0.2”转发“国教实践｜上海体育博物馆志愿者招募”，并说明对志愿者活动感兴趣的同学可以看一看。\n当前聊天正文没有列出报名条件、招募名额、服务时间、具体服务地点及报名截止。\n请打开原推文核实后再报名或设置提醒。\n本项目与上海图书馆、宋庆龄陵园招募分别归档。",
+    url:"https://mp.weixin.qq.com/s?__biz=MzU5NzUwNDQ2Mg==&mid=2247523512&idx=3&sn=e56be6b368c8c4dad6b5932c41f539f8&chksm=ff84d62230d6b082734ffa30db73fba149988ad1ee949aa44876c0f07214ab53a6e96bc25fc6&mpshare=1&scene=1&srcid=1011EAf9V0ZzzGidkxfomOtm&sharer_shareinfo=a0717f1b0af4e88c7eda35488c216dfb&sharer_shareinfo_first=a0717f1b0af4e88c7eda35488c216dfb#rd",
+    source:"聊天记录 9.txt · 发布者：0.2 · 2026-10-11 13:10"
+  },
+  {
+    id:"shanghai-library-volunteer",
+    title:"国教实践：上海图书馆志愿者招募",
+    category:"志愿",
+    published:"2026-10-11T13:10:00+08:00",
+    ddl:"unknown",
+    latestFile:true,
+    timeText:"报名截止、服务时间及具体安排待查看原推文",
+    description:"发布者“0.2”转发“国教实践｜上海图书馆志愿者招募”，供对志愿活动感兴趣的同学查看。\n当前聊天正文没有列出报名条件、招募名额、服务时间、具体服务馆址及报名截止。\n请打开原推文核实，不默认安排在某一馆区。\n本项目与上海体育博物馆、宋庆龄陵园招募分别归档。",
+    url:"https://mp.weixin.qq.com/s?__biz=MzU5NzUwNDQ2Mg==&mid=2247523512&idx=2&sn=eafab93b0be02b8713455e0c66a862f2&chksm=ff027c0570b57088774922c0b1b213c7f8240aa11c27cba1fde9497b8bdebb5447b290e429d0&mpshare=1&scene=1&srcid=1011iPukAaJclrlMtZWOzLFH&sharer_shareinfo=9db035609d98a8923a1c08ddf6beeb20&sharer_shareinfo_first=9db035609d98a8923a1c08ddf6beeb20#rd",
+    source:"聊天记录 9.txt · 发布者：0.2 · 2026-10-11 13:10"
   }
 ];
 
-// 与旧版相同，保留已有状态。
+// 保持旧版存储名称，兼容已有状态。
 const KEY = "campus-organizer-v1";
 const $ = id => document.getElementById(id);
 const hasOwn = (obj,key) => Object.prototype.hasOwnProperty.call(obj,key);
@@ -816,6 +856,7 @@ function urgency(task){
   }
 
   const first=Date.parse(task.deadline);
+  // 仅给出截止日期时，全天显示“时刻待核实”，不补造具体时刻。
   const last=task.dateOnly ? first+86400000 : first;
   const now=referenceNow();
 
@@ -865,6 +906,7 @@ function render(){
   renderNav();
 
   const done=all.filter(task=>state.completed[task.id]).length;
+  $("baseCount").textContent=BASE_TASKS.length;
   $("totalStat").textContent=all.length;
   $("doneStat").textContent=done;
   $("urgentStat").textContent=all.filter(task=>
@@ -890,7 +932,8 @@ function render(){
   const filtered=all.filter(task=>{
     if(activeCategory!=="全部" && task.category!==activeCategory) return false;
     if(source==="latest" && !task.latestFile) return false;
-    if(source==="previous" && !task.previousBatch) return false;
+    if(source==="file8" && !task.file8) return false;
+    if(source==="courseBatch" && !task.courseBatch) return false;
     if(source==="personal" && !task.custom) return false;
 
     const text=[
@@ -923,9 +966,14 @@ function render(){
     return urgency(a).rank-urgency(b).rank||deadlineOrder(a,b)||newest;
   });
 
-  $("sectionTitle").textContent=source==="latest"
-    ? "本次文件对应事项"
-    : activeCategory==="全部" ? "全部事项" : activeCategory+"事项";
+  const sourceTitles={
+    latest:"本次新增 · 聊天记录 9.txt",
+    file8:"来源归档 · 聊天记录 8.txt",
+    courseBatch:"此前新增的 5 条事项",
+    personal:"个人待办"
+  };
+  $("sectionTitle").textContent=sourceTitles[source] ||
+    (activeCategory==="全部" ? "全部事项" : activeCategory+"事项");
   $("resultCount").textContent=`显示 ${filtered.length} / ${all.length} 条`;
 
   $("taskGrid").innerHTML=filtered.length
@@ -954,7 +1002,8 @@ function renderCard(task){
         <div class="tags">
           <span class="tag category">${escapeHTML(task.category)}</span>
           <span class="tag">${escapeHTML(ddlText)}</span>
-          ${task.latestFile?'<span class="tag new">本次来源已合并</span>':""}
+          ${task.latestFile?'<span class="tag new">本次新增</span>':""}
+          ${task.file8?'<span class="tag">重复来源已合并</span>':""}
         </div>
         <label class="check">
           <input type="checkbox" data-complete="${escapeHTML(task.id)}"
@@ -1054,7 +1103,7 @@ $("actualDateBtn").onclick=()=>{
 
 $("archiveDateBtn").onclick=()=>{
   actualReference=false;
-  $("referenceDate").value="2026-10-10";
+  $("referenceDate").value="2026-10-11";
   render();
 };
 
@@ -1247,7 +1296,7 @@ $("addForm").onsubmit=event=>{
 
 $("exportBtn").onclick=()=>{
   const data={
-    version:3,
+    version:4,
     exportedAt:new Date().toISOString(),
     tasks:tasks(),
     custom:state.custom,
@@ -1288,7 +1337,7 @@ $("importFile").addEventListener("change",async event=>{
     const imported=normalizeState(raw);
     if(!confirm(
       "导入会替换当前完成状态、提醒和个人待办。\n"+
-      "内置的 26 条通知保持不变。\n"+
+      `内置的 ${BASE_TASKS.length} 条通知保持不变。\n`+
       "建议先导出当前数据。确认继续？"
     )) return;
 
