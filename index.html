@@ -36,7 +36,7 @@ input:focus,select:focus,textarea:focus{
 .subtle{background:var(--light);color:var(--primary);border-color:transparent}
 .danger{color:var(--red)}
 .muted{color:var(--muted)}
-.shell{display:flex;max-width:1480px;margin:auto;min-height:100vh}
+.shell{display:flex;max-width:1480px;margin:auto;min-height:100vh;position:relative}
 .sidebar{
   width:230px;flex-shrink:0;padding:28px 18px;background:white;
   border-right:1px solid var(--line);position:sticky;top:0;height:100vh;
@@ -134,6 +134,69 @@ h1{font-size:27px;margin:5px 0}
   text-align:center;padding:60px 20px;color:var(--muted);
 }
 footer{text-align:center;font-size:11px;color:var(--muted);padding:26px 0 5px}
+/* 浮窗 */
+.floating-panel{
+  position:fixed;right:24px;bottom:24px;
+  width:320px;background:white;border:1px solid var(--line);
+  border-radius:18px;padding:16px;
+  box-shadow:0 25px 60px #17203e35;
+  max-height:420px;
+  display:flex;flex-direction:column;
+  z-index:99;
+}
+.floating-panel h3{
+  margin:0 0 8px;font-size:15px;color:var(--primary);
+}
+.floating-panel .panel-list{
+  overflow:auto;flex:1;display:flex;flex-direction:column;gap:10px;
+}
+.floating-panel .panel-item{
+  padding:10px 12px;border-radius:12px;
+  border:1px solid #eceffc;background:#fafbff;
+  display:flex;flex-direction:column;gap:4px;
+}
+.floating-panel .panel-item strong{
+  font-size:13px;
+}
+.floating-panel .panel-item span{
+  font-size:12px;color:var(--muted);
+}
+.floating-panel button{
+  align-self:flex-end;padding:5px 8px;font-size:12px;
+}
+.floating-panel .panel-empty{font-size:12px;color:var(--muted);}
+@media(max-width:1000px){
+  .sidebar{width:190px;padding:25px 12px}
+  main{padding:24px 20px}
+  .top{align-items:flex-start;flex-direction:column}
+}
+@media(max-width:900px){
+  .floating-panel{
+    right:12px;bottom:12px;width:260px;
+  }
+}
+@media(max-width:720px){
+  .shell{display:block}
+  .sidebar{
+    width:100%;height:auto;position:static;padding:16px;
+    border-right:none;border-bottom:1px solid var(--line);
+  }
+  .brand{margin-bottom:12px}
+  .nav{flex-direction:row;overflow:auto}
+  .nav button{white-space:nowrap}
+  .nav-title,.side-note{display:none}
+  main{padding:20px 15px}
+  h1{font-size:23px}
+  .stats{grid-template-columns:repeat(2,1fr);gap:10px}
+  .stat{padding:14px}
+  .grid{grid-template-columns:1fr}
+  .search{flex-basis:100%;width:100%}
+  .tools select{flex:1;min-width:125px}
+  .floating-panel{
+    position:static;margin:16px auto 0;
+    width:calc(100% - 32px);max-height:none;
+  }
+}
 dialog{
   width:min(500px,calc(100% - 28px));max-height:90vh;overflow:auto;
   border:none;border-radius:18px;padding:24px;color:var(--ink);
@@ -154,32 +217,6 @@ dialog p{font-size:13px;color:var(--muted)}
   max-width:90vw;z-index:100;box-shadow:0 8px 30px #17203e33;
 }
 #toast[hidden]{display:none}
-@media(min-width:1350px){
-  .grid{grid-template-columns:repeat(3,minmax(0,1fr))}
-}
-@media(max-width:1000px){
-  .sidebar{width:190px;padding:25px 12px}
-  main{padding:24px 20px}
-  .top{align-items:flex-start;flex-direction:column}
-}
-@media(max-width:720px){
-  .shell{display:block}
-  .sidebar{
-    width:100%;height:auto;position:static;padding:16px;
-    border-right:none;border-bottom:1px solid var(--line);
-  }
-  .brand{margin-bottom:12px}
-  .nav{flex-direction:row;overflow:auto}
-  .nav button{white-space:nowrap}
-  .nav-title,.side-note{display:none}
-  main{padding:20px 15px}
-  h1{font-size:23px}
-  .stats{grid-template-columns:repeat(2,1fr);gap:10px}
-  .stat{padding:14px}
-  .grid{grid-template-columns:1fr}
-  .search{flex-basis:100%;width:100%}
-  .tools select{flex:1;min-width:125px}
-}
 </style>
 </head>
 <body>
@@ -191,6 +228,10 @@ dialog p{font-size:13px;color:var(--muted)}
     </div>
     <div class="nav-title">通知归档 · 类别</div>
     <nav id="categoryNav" class="nav" aria-label="事项类别"></nav>
+    <div class="nav-title">资源视图</div>
+    <nav class="nav" aria-label="资源栏目">
+      <button id="resourceTab" data-view="resource" aria-pressed="false">资源 · 无截止日期</button>
+    </nav>
     <div class="side-note">
       <strong>让重要的事，不再被聊天刷走。</strong>
       <p>完成状态、提醒和个人待办保存在当前浏览器，不会自动跨设备同步。</p>
@@ -255,7 +296,7 @@ dialog p{font-size:13px;color:var(--muted)}
           <option value="all">全部来源</option>
           <option value="latest">本次文件：聊天记录 9.txt</option>
           <option value="file8">上次文件：聊天记录 8.txt</option>
-          <option value="courseBatch">此前新增的 5 条</option>
+          <option value="courseBatch">此前新增的 5 条事项</option>
           <option value="personal">个人待办</option>
         </select>
         <select id="statusFilter" aria-label="完成状态">
@@ -304,6 +345,12 @@ dialog p{font-size:13px;color:var(--muted)}
     </footer>
   </main>
 </div>
+
+<aside class="floating-panel" id="floatingPanel" aria-live="polite">
+  <h3>临近截止 · 快速提醒</h3>
+  <div class="panel-list" id="floatingList"></div>
+  <button id="viewUrgentBtn" class="subtle">查看全部临近事项</button>
+</aside>
 
 <dialog id="reminderDialog">
   <form id="reminderForm">
@@ -366,8 +413,6 @@ const CATEGORIES = {
   "志愿":"🤝","社团":"💡","学生服务":"🎓","安全":"🛡"
 };
 
-// 旧事项沿用固定 ID，避免完成状态和提醒失去关联。
-// 新文件独立归档；重复文件仅合并来源。
 const BASE_TASKS = [
   {
     id:"national-security",
@@ -538,7 +583,7 @@ const BASE_TASKS = [
     ddl:"unknown",
     timeText:"26 级新生申领暂定 10 月底，具体另行通知",
     description:"10 月 8 日领取激活通知仅针对之前申领的存量卡，并非要求所有 26 级新生现在领取。地点和时段需看原推文。",
-    url:"https://mp.weixin.qq.com/s?__biz=MzA3OTUyNTYyMg==&mid=2650569335&idx=1&sn=2c72b9b26aa195f7d3158a4b9fcbc76c&chksm=86d6fc2e835716ca2de383eb6987d859296fe1446106699194f94804955f2f3139e2df7aee4f",
+    url:"https://mp.weixin.qq.com/s?__biz=MzA3OTUyNTYyMg==&mid=2650569335&idx=1&sn=2c72b9b26aa195f7d3158a4b9fcbc76c&chksm=86d6fc2e835716ca2de383eb6987d859296fe1446106691194f94804955f2f3139e2df7aee4f",
     source:"聊天记录.txt · 10-08 19:05，19:46 补充"
   },
   {
@@ -666,9 +711,6 @@ const BASE_TASKS = [
     url:"https://mp.weixin.qq.com/s?__biz=MzU5NzUwNDQ2Mg==&mid=2247523462&idx=3&sn=c1a6d0c08b66f4b07a13a47ac2d19b39&chksm=ff4124edebfe4cb96073f15ef8e5110fa8ee33681e87a65aa59978e90c6364477fcb80019dd8&mpshare=1&scene=1&srcid=101040Yo34GaBepcdag4EMG5&sharer_shareinfo=a36d445109c861d71c7d1f7deb20c23e&sharer_shareinfo_first=a36d445109c861d71c7d1f7deb20c23e#rd",
     source:"聊天记录 5.txt、聊天记录 8.txt · 2026-10-10 17:03—17:04（重复来源已合并）"
   },
-
-  // 本次新增：聊天记录 9.txt。
-  // 同一发布者、同一时刻，但项目和推文不同，因此分别归档。
   {
     id:"shanghai-sports-museum-volunteer",
     title:"国教实践：上海体育博物馆志愿者招募",
@@ -695,7 +737,6 @@ const BASE_TASKS = [
   }
 ];
 
-// 保持旧版存储名称，兼容已有状态。
 const KEY = "campus-organizer-v1";
 const $ = id => document.getElementById(id);
 const hasOwn = (obj,key) => Object.prototype.hasOwnProperty.call(obj,key);
@@ -703,10 +744,13 @@ const validDate = value =>
   typeof value === "string" && Number.isFinite(Date.parse(value));
 
 let activeCategory = "全部";
+let activeView = null; // "resource" 表示资源栏
 let actualReference = true;
 let reminderTarget = null;
 let toastTimer;
 let storageWarning = false;
+
+const URGENT_LIMIT = 5;
 
 function formatTime(value){
   const date = new Date(value);
@@ -856,7 +900,6 @@ function urgency(task){
   }
 
   const first=Date.parse(task.deadline);
-  // 仅给出截止日期时，全天显示“时刻待核实”，不补造具体时刻。
   const last=task.dateOnly ? first+86400000 : first;
   const now=referenceNow();
 
@@ -883,6 +926,10 @@ function deadlineOrder(a,b){
   return aTime===bTime ? 0 : aTime<bTime ? -1 : 1;
 }
 
+function isResourceTask(task){
+  return !task.deadline;
+}
+
 function renderNav(){
   const all=tasks();
   $("categoryNav").innerHTML=Object.entries(CATEGORIES)
@@ -891,7 +938,7 @@ function renderNav(){
         (category==="全部" || task.category===category) &&
         !state.completed[task.id]
       ).length;
-      const active=category===activeCategory;
+      const active=category===activeCategory && !activeView;
       return `
         <button data-category="${escapeHTML(category)}"
           class="${active?"active":""}" aria-pressed="${active}">
@@ -899,6 +946,11 @@ function renderNav(){
           <span class="count">${count}</span>
         </button>`;
     }).join("");
+
+  const resourceBtn=$("resourceTab");
+  const isActive=activeView==="resource";
+  resourceBtn.classList.toggle("active",isActive);
+  resourceBtn.setAttribute("aria-pressed",isActive?"true":"false");
 }
 
 function render(){
@@ -930,11 +982,16 @@ function render(){
   const source=$("sourceFilter").value;
 
   const filtered=all.filter(task=>{
-    if(activeCategory!=="全部" && task.category!==activeCategory) return false;
+    if(activeView==="resource" && !isResourceTask(task)) return false;
+    if(activeView!=="resource" && activeCategory!=="全部" && task.category!==activeCategory) return false;
     if(source==="latest" && !task.latestFile) return false;
     if(source==="file8" && !task.file8) return false;
     if(source==="courseBatch" && !task.courseBatch) return false;
     if(source==="personal" && !task.custom) return false;
+
+    if(activeView==="resource" && source==="all" && status==="all"){
+      // 默认资源视图只显示无ddl任务，无需额外处理。
+    }
 
     const text=[
       task.title,task.description,task.attachment,
@@ -972,13 +1029,16 @@ function render(){
     courseBatch:"此前新增的 5 条事项",
     personal:"个人待办"
   };
-  $("sectionTitle").textContent=sourceTitles[source] ||
-    (activeCategory==="全部" ? "全部事项" : activeCategory+"事项");
+  $("sectionTitle").textContent=activeView==="resource"
+    ? "资源 · 无截止日期"
+    : sourceTitles[source] ||
+      (activeCategory==="全部" ? "全部事项" : activeCategory+"事项");
   $("resultCount").textContent=`显示 ${filtered.length} / ${all.length} 条`;
-
   $("taskGrid").innerHTML=filtered.length
     ? filtered.map(renderCard).join("")
     : '<div class="empty">没有符合条件的事项。<br>请调整筛选条件。</div>';
+
+  renderFloatingPanel();
 }
 
 function renderCard(task){
@@ -1053,8 +1113,53 @@ function renderCard(task){
     </article>`;
 }
 
+function getUrgentTasks(){
+  const now=referenceNow();
+  return tasks().filter(task=>{
+    if(state.completed[task.id]) return false;
+    if(!task.deadline) return false;
+    const deadline=Date.parse(task.deadline);
+    const offset=task.dateOnly ? 0 : 0;
+    const diff=deadline+offset - now;
+    return diff>=0 && diff<=72*3600000;
+  }).sort((a,b)=>Date.parse(a.deadline)-Date.parse(b.deadline));
+}
+
+function renderFloatingPanel(){
+  const list=$("floatingList");
+  const urgent=getUrgentTasks().slice(0,URGENT_LIMIT);
+  if(!urgent.length){
+    list.innerHTML='<div class="panel-empty">当前没有72小时内的临近截止事项。</div>';
+  }else{
+    list.innerHTML=urgent.map(task=>{
+      const timeLeft=formatDuration(Date.parse(task.deadline)-referenceNow());
+      return `
+        <div class="panel-item">
+          <strong>${escapeHTML(task.title)}</strong>
+          <span>截止：${escapeHTML(deadlineLabel(task))}</span>
+          <span>剩余：${escapeHTML(timeLeft)}</span>
+        </div>`;
+    }).join("");
+  }
+}
+
+function formatDuration(ms){
+  if(ms<=0) return "已到期";
+  const hours=Math.floor(ms/3600000);
+  const mins=Math.floor((ms%3600000)/60000);
+  const days=Math.floor(hours/24);
+  const hh=hours%24;
+  const parts=[];
+  if(days) parts.push(`${days} 天`);
+  if(hh) parts.push(`${hh} 小时`);
+  if(mins) parts.push(`${mins} 分钟`);
+  if(!parts.length) parts.push("不足 1 分钟");
+  return parts.join("");
+}
+
 function resetFilters(){
   activeCategory="全部";
+  activeView=null;
   $("search").value="";
   ["sourceFilter","statusFilter","ddlFilter","urgencyFilter"]
     .forEach(id=>{$(id).value="all"});
@@ -1064,9 +1169,20 @@ function resetFilters(){
 $("categoryNav").addEventListener("click",event=>{
   const button=event.target.closest("[data-category]");
   if(button){
+    activeView=null;
     activeCategory=button.dataset.category;
     render();
   }
+});
+
+$("resourceTab").addEventListener("click",()=>{
+  if(activeView==="resource"){
+    activeView=null;
+  }else{
+    activeView="resource";
+    activeCategory="全部";
+  }
+  render();
 });
 
 ["search","sourceFilter","statusFilter","ddlFilter","urgencyFilter","sortFilter"]
@@ -1104,6 +1220,16 @@ $("actualDateBtn").onclick=()=>{
 $("archiveDateBtn").onclick=()=>{
   actualReference=false;
   $("referenceDate").value="2026-10-11";
+  render();
+};
+
+$("viewUrgentBtn").onclick=()=>{
+  resetFilters();
+  $("statusFilter").value="pending";
+  const urgentTasks=getUrgentTasks();
+  if(urgentTasks.length){
+    urgentTasks.forEach(task=>state.completed[task.id] && (state.completed[task.id]=false));
+  }
   render();
 };
 
@@ -1236,9 +1362,7 @@ function checkReminders(){
       new Notification("校园清单 · 待办提醒",{
         body:message,tag:"campus-reminder"
       });
-    }catch{
-      // 系统通知不可用时，保留页面内提醒。
-    }
+    }catch{}
   }
 }
 
