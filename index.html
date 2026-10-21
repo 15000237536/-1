@@ -736,7 +736,85 @@ const BASE_TASKS = [
     source:"聊天记录 9.txt · 发布者：0.2 · 2026-10-11 13:10"
   }
 ];
+<head>
+  <meta charset="UTF-8" />
+  <title>青年先锋学校通知中心</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <main>
+    <section id="notifications">
+      <h1>近期通知与资源</h1>
+      <div id="event-list"></div>
+    </section>
 
+    <section id="resources">
+      <h2>资源下载</h2>
+      <ul id="resource-list"></ul>
+    </section>
+  </main>
+
+  <aside id="reminder">
+    <h3>临近截止提醒</h3>
+    <div id="countdown"></div>
+  </aside>
+
+  <script type="module">
+    import { events, resources } from "./data.js";
+
+    const eventList = document.getElementById("event-list");
+    const resourceList = document.getElementById("resource-list");
+    const countdownBox = document.getElementById("countdown");
+
+    events.forEach(event => {
+      const card = document.createElement("article");
+      card.className = "event-card";
+      card.innerHTML = `
+        <div class="event-meta">
+          <h3>${event.title}</h3>
+          <p class="event-date">${new Date(event.date).toLocaleString()}</p>
+        </div>
+        <p>${event.description}</p>
+        <ul class="attachment-list">
+          ${event.attachments.map(att => `<li><a href="${att.url}" download>${att.name}</a></li>`).join("")}
+        </ul>
+      `;
+      eventList.appendChild(card);
+    });
+
+    resources.forEach(resource => {
+      const li = document.createElement("li");
+      li.innerHTML = `<a href="${resource.path}" download>${resource.name}</a> (${resource.type})`;
+      resourceList.appendChild(li);
+    });
+
+    function updateCountdown() {
+      const now = new Date();
+      const upcoming = events
+        .map(e => ({ ...e, target: new Date(e.date) }))
+        .filter(e => e.target >= now)
+        .sort((a, b) => a.target - b.target)[0];
+
+      if (!upcoming) {
+        countdownBox.textContent = "暂无临近截止事项。";
+        return;
+      }
+
+      const diff = upcoming.target - now;
+      const hours = Math.floor(diff / (1000 * 60 * 60));
+      const minutes = Math.floor((diff / (1000 * 60)) % 60);
+      const seconds = Math.floor((diff / 1000) % 60);
+
+      countdownBox.textContent = `${upcoming.title}：剩余 ${hours}小时 ${minutes}分 ${seconds}秒`;
+    }
+
+    updateCountdown();
+    setInterval(updateCountdown, 60 * 1000);
+
+    // 后续步骤提示
+    const footer = document.createElement("footer");
+    footer.innerHTML = `<p>后续步骤：请逐个下载表格，按要求填写并交相关负责人。如需我帮你生成填表指南或微信通知文案，请告诉我。</p>`;
+    document.body.appendChild(footer);
 const KEY = "campus-organizer-v1";
 const $ = id => document.getElementById(id);
 const hasOwn = (obj,key) => Object.prototype.hasOwnProperty.call(obj,key);
