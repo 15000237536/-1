@@ -217,6 +217,25 @@ dialog p{font-size:13px;color:var(--muted)}
   max-width:90vw;z-index:100;box-shadow:0 8px 30px #17203e33;
 }
 #toast[hidden]{display:none}
+.data-status{
+  display:inline-flex;align-items:center;gap:7px;margin-top:12px;
+  padding:6px 12px;border-radius:999px;font-size:12.5px;
+  background:var(--light);color:var(--primary);border:1px solid #dfe3ff;
+}
+.data-status::before{
+  content:"";width:7px;height:7px;border-radius:50%;
+  background:currentColor;flex:0 0 auto;
+}
+.data-status.ok{background:#eaf6f1;color:var(--green);border-color:#d3ece2}
+.data-status.warn{background:#fff3f1;color:var(--red);border-color:#f8d9d6}
+.data-status.loading{background:var(--light);color:var(--muted);border-color:var(--line)}
+.data-status strong{font-weight:700}
+.file-link{
+  display:inline-block;padding:5px 10px;border-radius:8px;
+  background:#f2f4ff;border:1px solid #dfe3ff;color:var(--primary);
+  font-size:12.5px;text-decoration:none;line-height:1.4;
+}
+.file-link:hover{background:#e7eaff}
 </style>
 </head>
 <body>
@@ -234,8 +253,9 @@ dialog p{font-size:13px;color:var(--muted)}
     </nav>
     <div class="side-note">
       <strong>让重要的事，不再被聊天刷走。</strong>
-      <p>完成状态、提醒和个人待办保存在当前浏览器，不会自动跨设备同步。</p>
-      <p>提醒需要页面保持打开，建议定期导出备份。</p>
+      <p>事项来自仓库里的 <code>data.json</code>，换设备、清缓存都不会丢。</p>
+      <p>完成状态与提醒保存在当前浏览器，属于个人操作记录。</p>
+      <p>提醒需要页面保持打开。</p>
     </div>
   </aside>
 
@@ -245,9 +265,11 @@ dialog p{font-size:13px;color:var(--muted)}
         <div class="eyebrow">YOUR CAMPUS, ORGANIZED</div>
         <h1>把校园日常，安排得井井有条。</h1>
         <p id="todayText"></p>
+        <div id="dataStatus" class="data-status loading">正在读取云端事项…</div>
       </div>
       <div class="top-actions">
         <button id="permissionBtn">开启通知</button>
+        <button id="pushDataBtn" title="把当前所有事项打包成 data.json，上传到 GitHub 仓库即可永久保存、跨设备通用">↓ 下载 data.json</button>
         <button id="exportBtn">↓ 导出备份</button>
         <button id="importBtn">↑ 导入备份</button>
         <button id="addBtn" class="primary">＋ 新增待办</button>
@@ -275,9 +297,9 @@ dialog p{font-size:13px;color:var(--muted)}
     </section>
 
     <div class="banner update">
-      <strong>本次新增 2 条：</strong>
-      上海体育博物馆志愿者招募、上海图书馆志愿者招募。
-      来源：聊天记录 9.txt，发布时间为 2026-10-11 13:10。
+      <strong>本次新增 5 条：</strong>
+      青马班第十九期报名、入团申请书撰写与递交、第一章极限作业、2026 红歌班歌大赛、第三届「国士杯」短视频大赛。
+      来源：聊天记录 12.txt / 13.txt（2026-10-17 至 10-20）。
       内置事项共 <span id="baseCount">28</span> 条。
       <button id="latestFileBtn" class="subtle">查看本次新增</button>
     </div>
@@ -294,7 +316,7 @@ dialog p{font-size:13px;color:var(--muted)}
           placeholder="搜索通知、来源文件、关键词…" aria-label="搜索事项">
         <select id="sourceFilter" aria-label="来源范围">
           <option value="all">全部来源</option>
-          <option value="latest">本次文件：聊天记录 9.txt</option>
+          <option value="latest">本次新增：聊天记录 12 / 13</option>
           <option value="file8">上次文件：聊天记录 8.txt</option>
           <option value="courseBatch">此前新增的 5 条事项</option>
           <option value="personal">个人待办</option>
@@ -738,6 +760,11 @@ const BASE_TASKS = [
 ];
 
 const KEY = "campus-organizer-v1";
+const DATA_URL = "data.json";
+
+let remoteTasks = [];
+let remoteInfo = { state:"loading", message:"正在读取云端事项…" };
+
 const $ = id => document.getElementById(id);
 const hasOwn = (obj,key) => Object.prototype.hasOwnProperty.call(obj,key);
 const validDate = value =>
@@ -851,8 +878,95 @@ function loadState(){
 
 let state = loadState();
 
+function normalizeRemoteTask(task){
+  if(!task || typeof task.id!=="string" || typeof task.title!=="string") return null;
+  const title=task.title.trim();
+  if(!title) return null;
+
+  const deadline=validDate(task.deadline) ? task.deadline : null;
+  const published=validDate(task.published)
+    ? task.published : new Date().toISOString();
+  const category=hasOwn(CATEGORIES,task.category) && task.category!=="全部"
+    ? task.category : "活动";
+
+  return {
+    id:task.id,
+    remote:true,
+    title:title.slice(0,120),
+    category,
+    description:typeof task.description==="string"
+      ? task.description.slice(0,2000) : "",
+    published,
+    deadline,
+    ddl:deadline ? "has" : "none",
+    timeText:deadline
+      ? "截止："+formatTime(deadline)+"（北京时间）"
+      : "未设置截止时间",
+    url:typeof task.url==="string" ? task.url : "",
+    latestFile:task.latestFile===true,
+    files:Array.isArray(task.files)
+      ? task.files
+          .filter(file=>file && typeof file.name==="string" &&
+            typeof file.path==="string" && /^files\/[\w./-]+$/.test(file.path))
+          .map(file=>({name:file.name.slice(0,80),path:file.path}))
+      : [],
+    source:typeof task.source==="string" && task.source
+      ? task.source : "data.json"
+  };
+}
+
+async function loadRemote(){
+  try{
+    const response=await fetch(DATA_URL+"?v="+Date.now(),{cache:"no-store"});
+    if(!response.ok) throw new Error("HTTP "+response.status);
+
+    const raw=await response.json();
+    const list=Array.isArray(raw)
+      ? raw
+      : Array.isArray(raw && raw.tasks) ? raw.tasks : [];
+
+    const seen=new Set(BASE_TASKS.map(task=>task.id));
+    const parsed=[];
+    for(const item of list){
+      const task=normalizeRemoteTask(item);
+      if(!task || seen.has(task.id)) continue;
+      seen.add(task.id);
+      parsed.push(task);
+    }
+
+    remoteTasks=parsed;
+    const stamp=raw && validDate(raw.updatedAt) ? formatTime(raw.updatedAt) : null;
+    remoteInfo={
+      state:"ok",
+      message:`云端 <strong>${parsed.length}</strong> 条 · `+
+        (stamp ? "更新于 "+stamp : "未标注更新时间")
+    };
+  }catch(error){
+    remoteTasks=[];
+    remoteInfo={
+      state:"warn",
+      message:`读不到 data.json（${error.message}）· 现在只显示内置与本地事项`
+    };
+  }
+  renderDataStatus();
+}
+
+function renderDataStatus(){
+  const node=$("dataStatus");
+  if(!node) return;
+  node.className="data-status "+remoteInfo.state;
+  node.innerHTML=remoteInfo.message;
+}
+
 function tasks(){
-  return [...BASE_TASKS,...state.custom];
+  const seen=new Set();
+  const merged=[];
+  for(const task of [...BASE_TASKS,...remoteTasks,...state.custom]){
+    if(!task || typeof task.id!=="string" || seen.has(task.id)) continue;
+    seen.add(task.id);
+    merged.push(task);
+  }
+  return merged;
 }
 
 function toast(message){
@@ -1100,6 +1214,12 @@ function renderCard(task){
         ${safeURL
           ? `<a href="${escapeHTML(safeURL)}" target="_blank"
               rel="noopener noreferrer">查看原链接 ↗</a>`:""}
+        ${task.files && task.files.length
+          ? task.files.map(file=>
+              `<a class="file-link" href="${escapeHTML(file.path)}"
+                 download title="下载 ${escapeHTML(file.name)}">⤓ ${escapeHTML(file.name)}</a>`
+            ).join("")
+          : ""}
         ${task.attachment
           ? `<button data-attachment="${escapeHTML(task.id)}">附件说明</button>`:""}
         ${task.custom
@@ -1441,6 +1561,49 @@ $("exportBtn").onclick=()=>{
   toast("备份已导出，请妥善保存。");
 };
 
+$("pushDataBtn").onclick=()=>{
+  const seen=new Set(BASE_TASKS.map(task=>task.id));
+  const list=[];
+
+  for(const task of [...remoteTasks,...state.custom]){
+    if(!task || seen.has(task.id)) continue;
+    seen.add(task.id);
+
+    const item={
+      id:task.id,
+      title:task.title,
+      category:task.category,
+      published:task.published,
+      description:task.description||"",
+      source:task.source||"个人添加"
+    };
+    if(task.deadline) item.deadline=task.deadline;
+    if(task.url) item.url=task.url;
+    if(task.files && task.files.length) item.files=task.files;
+    list.push(item);
+  }
+
+  const payload={
+    version:1,
+    updatedAt:new Date().toISOString(),
+    tasks:list
+  };
+
+  const blob=new Blob([JSON.stringify(payload,null,2)],{
+    type:"application/json"
+  });
+  const url=URL.createObjectURL(blob);
+  const anchor=document.createElement("a");
+  anchor.href=url;
+  anchor.download="data.json";
+  document.body.appendChild(anchor);
+  anchor.click();
+  anchor.remove();
+  setTimeout(()=>URL.revokeObjectURL(url),1000);
+
+  toast(`已下载 data.json（${list.length} 条）。上传到 GitHub 仓库覆盖同名文件，即可永久保存、换设备可见。`);
+};
+
 $("importBtn").onclick=()=>$("importFile").click();
 
 $("importFile").addEventListener("change",async event=>{
@@ -1495,6 +1658,10 @@ setInterval(checkReminders,10000);
 setInterval(render,60000);
 render();
 checkReminders();
+loadRemote().then(()=>{
+  render();
+  checkReminders();
+});
 </script>
 </body>
 </html>

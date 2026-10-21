@@ -1,0 +1,80 @@
+{
+  "version": 1,
+  "updatedAt": "2026-10-21T10:12:00+08:00",
+  "tasks": [
+    {
+      "id": "qingma19-recruit",
+      "title": "青马班第十九期报名",
+      "category": "活动",
+      "published": "2026-10-19T15:55:00+08:00",
+      "deadline": "2026-10-28T13:00:00+08:00",
+      "description": "校团委招录第十九期「青年马克思主义者培养班」学员。填写学员推荐表与院系报名汇总表，交至 SISUSoEtwzzb@126.com，邮件主题命名为「青马班报名-自荐/推荐-姓名」。逾期后果自负。",
+      "files": [
+        {
+          "name": "招录通知.pdf",
+          "path": "files/qingma19-notice.pdf"
+        },
+        {
+          "name": "学员推荐表.docx",
+          "path": "files/qingma19-recommendation.docx"
+        },
+        {
+          "name": "院系报名汇总表.xlsx",
+          "path": "files/qingma19-summary.xlsx"
+        },
+        {
+          "name": "课程培养方案.pdf",
+          "path": "files/qingma19-curriculum.pdf"
+        }
+      ],
+      "source": "聊天记录 12.txt · 2026-10-19 15:55",
+      "latestFile": true
+    },
+    {
+      "id": "youth-league-application",
+      "title": "入团申请书撰写与递交",
+      "category": "学生服务",
+      "published": "2026-10-20T14:53:00+08:00",
+      "deadline": "2026-11-06T23:59:00+08:00",
+      "description": "有入团意向的同学按《入团申请书要求》撰写完成，11 月 6 日前交给各班团支书。11 月 9 日（周一）12:00 前，由团支书以团支部为单位交至 1 教楼 302 办公室熊玥老师处。",
+      "files": [
+        {
+          "name": "入团申请书要求.docx",
+          "path": "files/youth-league-requirements.docx"
+        }
+      ],
+      "source": "聊天记录 12.txt · 2026-10-20 14:53",
+      "latestFile": true
+    },
+    {
+      "id": "math-homework-limits",
+      "title": "作业：第一章 极限 概念与运算",
+      "category": "学习",
+      "published": "2026-10-17T11:55:00+08:00",
+      "deadline": "2026-10-22T23:59:00+08:00",
+      "description": "本周作业为《练习1 第一章 极限 概念与运算》，共 20 道题，有难有易，尽力思考推导即可。下周四（10 月 22 日）上课前提交纸质版，需写上姓名和学号。",
+      "source": "聊天记录 13.txt · 2026-10-17 11:55",
+      "latestFile": true
+    },
+    {
+      "id": "red-song-choir-2026",
+      "title": "2026 红歌班歌大赛",
+      "category": "活动",
+      "published": "2026-10-19T15:18:00+08:00",
+      "description": "国教活动「红韵润心田·班歌聚力量」红歌班歌大赛。报名方式、组队要求与比赛时间见公众号原文，通知未注明截止时间。",
+      "url": "https://mp.weixin.qq.com/s/d0BbcN_vI2EpQnddoXJl7Q",
+      "source": "聊天记录 12.txt · 2026-10-19 15:18",
+      "latestFile": true
+    },
+    {
+      "id": "guoshi-cup-video-2026",
+      "title": "第三届「国士杯」多语种短视频大赛",
+      "category": "活动",
+      "published": "2026-10-20T21:33:00+08:00",
+      "description": "赛事通知「讲好中国故事」，多语种短视频大赛。参赛要求与截止时间见原文，同学可自行报名参加。",
+      "url": "https://mp.weixin.qq.com/s?__biz=MzU5NzUwNDQ2Mg==&mid=2247523617&idx=1&sn=7a5cab9dcd56169b77c29a6b68872846&chksm=ffa13aba2013e27148abd4c46947800e13ef051beef8c8b97ff36bb399b476c545b9ea203db4&mpshare=1&scene=1&srcid=1020G3e8kWuNw9BQr3NybswB&sharer_shareinfo=e84f66813b47636f69844819fbdc91d5&sharer_shareinfo_first=2cc96ba87368223240bdec6253210629#rd",
+      "source": "聊天记录 12.txt · 2026-10-20 21:33",
+      "latestFile": true
+    }
+  ]
+}
