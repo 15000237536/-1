@@ -288,5 +288,49 @@ reminderModal.addEventListener("click", (e) => {
     state.reminderTarget = null;
   }
 });
+export const events = [
+  {
+    title: "青马班第十九期报名通知",
+    date: "2026-10-28T13:00:00",
+    description:
+      "按照学校党委安排开展青马工程第十九期培养班，报名材料提交至 SISUSoEtwzzb@126.com，主题“青马班报名-自荐/推荐-姓名”。",
+    attachments: [
+      { name: "青马班招录通知.pdf", url: "/files/青马班招录通知.pdf" },
+      // ...其他附件
+    ],
+    tags: ["报名", "重点"],
+  },
+  {
+    title: "入团申请书撰写要求",
+    date: "2026-11-06T23:59:00",
+    description:
+      "团支书收集入团申请书，必须用红线信纸、无错别字（附两版格式文件）。",
+    attachments: [
+      { name: "入团申请书要求.docx", url: "/files/入团申请书要求.docx" },
+      { name: "入团申请书要求(1).docx", url: "/files/入团申请书要求(1).docx" },
+    ],
+    tags: ["流程", "文档"],
+  },
+  // 其他事件
+];
+
+export const resources = [
+  {
+    name: "《青马工程第十九期课程培养方案》PDF",
+    path: "/files/附件3：上海外国语大学青年先锋学校第十九.pdf",
+    type: "PDF",
+  },
+  {
+    name: "报名汇总表模板（xlsx）",
+    path: "/files/附件2：上海外国语大学青年先锋学校第十九.xlsx",
+    type: "Excel",
+  },
+  {
+    name: "学员推荐表（docx）",
+    path: "/files/附件1：上海外国语大学青年先锋学校第十九.docx",
+    type: "Word",
+  },
+];
+
 
 render();
