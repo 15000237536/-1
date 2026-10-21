@@ -314,23 +314,3 @@ export const events = [
   // 其他事件
 ];
 
-export const resources = [
-  {
-    name: "《青马工程第十九期课程培养方案》PDF",
-    path: "/files/附件3：上海外国语大学青年先锋学校第十九.pdf",
-    type: "PDF",
-  },
-  {
-    name: "报名汇总表模板（xlsx）",
-    path: "/files/附件2：上海外国语大学青年先锋学校第十九.xlsx",
-    type: "Excel",
-  },
-  {
-    name: "学员推荐表（docx）",
-    path: "/files/附件1：上海外国语大学青年先锋学校第十九.docx",
-    type: "Word",
-  },
-];
-
-
-render();
